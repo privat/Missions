@@ -15,3 +15,4 @@
 module model
 
 import model::stats
+import progs

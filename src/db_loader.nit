@@ -50,6 +50,13 @@ for i in [1..10] do
 	end
 end
 
+var t = new Track("Pep8", "pep 8")
+config.tracks.save t
+var m = new Mission(t, "Ex1", "desc ex 1")
+var te = new TestCase("in", "out")
+m.testsuite.add te
+config.missions.save m
+
 # load some players
 var aurl = "https://avatars.githubusercontent.com/u/2577044?v=3"
 var players = [
