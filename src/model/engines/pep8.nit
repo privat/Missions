@@ -67,8 +67,28 @@ class Pep8Engine
 		var sourcefile = ws / "source.pep"
 		source.write_to_file(sourcefile)
 
-		# Try to compile
-		system("cp {pep8term("trap")} {pep8term("pep8os.pepo")} {ws} && cd {ws} && {pep8term("asem8")} source.pep 2> cmperr.txt")
+		# Copy scripts and requirements
+		system("cp {pep8term("trap")} {pep8term("pep8os.pepo")} {pep8term("asem8")} {pep8term("pep8")} peprun.sh {ws}")
+
+		# Copy each test input
+		var tests = program.mission.testsuite
+		var i = 0
+		for test in tests do
+			i += 1
+			var tdir = "test{i}"
+			# We get a subdirectory (a testspace) for each test case
+			var ts = ws / tdir
+			ts.mkdir
+
+			var ifile = ts / "input.txt"
+			test.provided_input.write_to_file(ifile)
+		end
+
+		# Run the payload
+		system("cd {ws} && bash peprun.sh")
+
+
+		# Retrieve information
 		var objfile = ws / "source.pepo"
 		if not objfile.file_exists then
 			var err = (ws/"cmperr.txt").to_path.read_all
@@ -89,47 +109,19 @@ class Pep8Engine
 		# We get a subdirectory (a testspace) for each test case
 		var ws = program.workspace.as(not null)
 		var ts = ws / tdir
-		ts.mkdir
 
-		# Prepare the input/output
-		var ifile = ts / "input.txt"
-		test.provided_input.write_to_file(ifile)
+		# Chech the output
 		var ofile = ts / "output.txt"
 		var sfile = ts / "sav.txt"
 		test.expected_output.write_to_file(sfile)
 
-		# Prepare the execution command
-		# Because `pep8` is interactive.
-		var canned_command = """
-l
-source
-i
-f
-{{{tdir}}}/input.txt
-o
-f
-{{{tdir}}}/output.txt
-x
-q
-"""
-		canned_command.write_to_file(ts/"canned_command")
-
-		# Try to execute the program on the test input
-		# TODO: some time/space limit!
-		var r = system("cd {ws} && {pep8term("pep8")} < {tdir}/canned_command > /dev/null 2> {tdir}/execerr.txt")
-		if r != 0 then
-			var out = (ts/"execerr.txt").to_path.read_all
-			res.error = "Execution error, contact the administrator: {out}"
-			return res
-		end
-
-		var instr_cpt = (ts/"execerr.txt").to_path.read_all.trim
-		res.time_score = instr_cpt.to_i
+		var instr_cpt = (ts/"timescore.txt").to_path.read_all.trim
+		if instr_cpt.is_int then res.time_score = instr_cpt.to_i
 
 		# Compare the result with diff
 		# TODO: some HTML-rich diff? Maybe client-side?
 		res.produced_output = ofile.to_path.read_all
-		r = system("cd {ws} && echo '' >> {tdir}/output.txt && diff -u {tdir}/sav.txt {tdir}/output.txt > {tdir}/diff.txt")
+		var r = system("cd {ws} && echo '' >> {tdir}/output.txt && diff -u {tdir}/sav.txt {tdir}/output.txt > {tdir}/diff.txt")
 		if r != 0 then
 			var out = (ts/"diff.txt").to_path.read_all
 			res.error = "Error: the result is not the expected one\n{out}"

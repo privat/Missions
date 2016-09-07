@@ -19,7 +19,22 @@ services:
                         - ./out:/missions/out
                 depends_on:
                         - mongo
+                        - runner
         mongo:
                 image: mongo:2
                 volumes:
                         - ./db:/data/db
+
+        # The runner looks at the `out` directory and trigger runners for them
+        runner:
+                build: runner
+                volumes:
+                        - ./out:/out
+                        - /var/run/docker.sock:/var/run/docker.sock
+                depends_on:
+                        - worker
+
+        # The worker image is executed by the `runner`
+        worker:
+                build: worker
+                image: mission_worker
