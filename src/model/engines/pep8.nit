@@ -68,7 +68,7 @@ class Pep8Engine
 		source.write_to_file(sourcefile)
 
 		# Copy scripts and requirements
-		system("cp {pep8term("trap")} {pep8term("pep8os.pepo")} {pep8term("asem8")} {pep8term("pep8")} peprun.sh {ws}")
+		system("cp {pep8term("trap")} {pep8term("pep8os.pepo")} {pep8term("asem8")} {pep8term("pep8")} share/peprun.sh {ws}")
 
 		# Copy each test input
 		var tests = program.mission.testsuite

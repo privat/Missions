@@ -1,18 +1,19 @@
 #!/bin/sh
 
-# Communication is done with the file system
+# Script to compile and execute a pep8 subission.
+# Communication is done with the file system:
 #
 # INPUT
 #
-# source.pep : the submission source code
-# test*/input.txt : the input for each test
+# * source.pep : the submission source code
+# * test*/input.txt : the input for each test
 #
 # OUTPUT
 #
-# cmperr.txt : compilation error messages
-# test*/output.txt : the produced output for each test
-# test*/execerr.txt : execution error messages, if any (should not occur)
-# test*/timescore.txt : the time execution according to pep8temp
+# * cmperr.txt : compilation error messages
+# * test*/output.txt : the produced output for each test
+# * test*/execerr.txt : execution error messages, if any (should not occur)
+# * test*/timescore.txt : the time execution according to pep8term
 #
 # To avoid the submission to look at the expected results or to temper them, the script just compile and run.
 # The evaluation of the results has to be done by the caller.
