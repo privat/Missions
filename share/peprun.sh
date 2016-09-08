@@ -50,6 +50,9 @@ EOF
 	# Try to execute the program on the test input
 	./pep8 < $t/canned_command > /dev/null 2> $t/execerr.txt || return 1
 
+	# Add a mandatory EOL at EOF to simplify diffing
+	echo >> $t/output.txt
+
 	# If success, execerr.txt contains the time score in fact.
 	mv $t/execerr.txt $t/timescore.txt
 

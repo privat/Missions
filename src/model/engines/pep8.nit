@@ -68,7 +68,6 @@ class Pep8Engine
 		# Run the payload
 		system("cd {ws} && bash peprun.sh")
 
-
 		# Retrieve information
 		var objfile = ws / "source.pepo"
 		if not objfile.file_exists then
@@ -88,24 +87,7 @@ class Pep8Engine
 		var ws = env.workspace
 		var ts = ws / tdir
 
-		# Check the output
-		var ofile = ts / "output.txt"
-		var sfile = ts / "sav.txt"
-		test.expected_output.write_to_file(sfile)
-
 		var instr_cpt = (ts/"timescore.txt").to_path.read_all.trim
 		if instr_cpt.is_int then res.time_score = instr_cpt.to_i
-
-		# Compare the result with diff
-		# TODO: some HTML-rich diff? Maybe client-side?
-		res.produced_output = ofile.to_path.read_all
-		var r = system("cd {ws} && echo '' >> {tdir}/output.txt && diff -u {tdir}/sav.txt {tdir}/output.txt > {tdir}/diff.txt")
-		if r != 0 then
-			var out = (ts/"diff.txt").to_path.read_all
-			res.error = "Error: the result is not the expected one\n{out}"
-			return res
-		end
-
-		return res
 	end
 end
