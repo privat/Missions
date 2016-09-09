@@ -66,7 +66,7 @@ class Pep8Engine
 		end
 
 		# Run the payload
-		system("cd {ws} && bash peprun.sh")
+		system("share/saferun.sh {ws} ./peprun.sh")
 
 		# Retrieve information
 		var objfile = ws / "source.pepo"

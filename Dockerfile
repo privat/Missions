@@ -21,6 +21,9 @@ RUN make pep8term && make
 ARG MISSION_HOST=0.0.0.0
 ARG MISSION_PORT=3000
 ARG MISSION_ROOT_URL=http://localhost:${MISSION_PORT}
+ARG SAFERUN=saferun_docker.sh
+
+RUN ln -sf $SAFERUN share/saferun.sh
 
 # Expose the web application
 EXPOSE ${MISSION_PORT}
