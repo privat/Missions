@@ -5,10 +5,35 @@ body {
 	margin-bottom: 70px;
 }
 
+/* Nav bar */
+
+.navbar-primary {
+	background-color: #0955A0;
+	border-color: #0955A0;
+	box-shadow: 0 1px 4px 0 rgba(0,0,0,0.4);
+	color: white;
+}
+
+.navbar-primary .navbar-brand, .navbar-primary .navbar-nav>li>a, .navbar-primary .breadcrumb a {
+	color: white;
+}
+
+
+.navbar .breadcrumb {
+	padding: 15px 0;
+	margin: 0 0 0 -5px;
+	background: transparent;
+}
+
+.navbar .breadcrumb>li:before {
+    padding: 0 15px;
+    color: #337ab7;
+    content: "/\00a0";
+}
+
 .progress { margin-bottom: 0 }
 
-.dropdown-menu { min-width: 250px }
-.dropdown-menu>li>a { padding: 10px 20px }
+/* Btn */
 
 .btn-link.btn-muted { color: #777 }
 .btn-link.btn-primary { color: #337ab7 }
@@ -16,6 +41,39 @@ body {
 .btn-link.btn-info { color: #31708f }
 .btn-link.btn-warning { color: #8a6d3b }
 .btn-link.btn-danger { color: #a94442 }
+
+.panel-mission-control h4 { margin: 0 0 5px 0}
+.panel-mission-control .glyphicon {
+	margin-right: 5px;
+}
+
+.panel-mission-control .btn {
+	width: 100px;
+}
+
+/*
+ * Stars
+ */
+
+.mission-star {
+	color: #777;
+	position: relative;
+	top: 1px;
+	display: inline-block;
+	font-family: 'Glyphicons Halflings';
+	font-style: normal;
+	font-weight: 400;
+	line-height: 1;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+.mission-star:before { content: "\e007"; }
+.mission-star.active { color: #fbca04; }
+.mission-star.active:before { content: "\e006"; }
+
+.mission-stars .mission-star { margin-left: 10px; }
+.mission-stars .mission-star:first-child { margin-left: 0; }
 
 /*
  * Users
@@ -28,8 +86,11 @@ body {
 .avatar-icon {
 	width: 20px;
 	height: 20px;
-	margin-left: 12px;
 	vertical-align: bottom;
+}
+
+.navbar li .avatar-icon {
+	margin-left: 12px;
 }
 
 /*
@@ -37,7 +98,7 @@ body {
  */
 
 .notifications {
-	min-width: 350px;
+	min-width: 500px;
 	background-color: #e7e7e7;
 	padding: 10px;
 }
@@ -46,40 +107,51 @@ body {
     margin-right: 6px;
 }
 
-.notification.media:first-child {
-	margin-top: 5px;
+.notifications .card {
+	margin: 2px;
 }
 
-.notification {
-	background-color: #fff;
-	padding: 5px 5px 10px 15px;
-	margin-top: 5px;
-    -webkit-box-shadow: inset 1px 1px 0 rgba(0,0,0,.2),inset 0 -1px 0 rgba(0,0,0,.3);
-    box-shadow: inset 1px 1px 0 rgba(0,0,0,.2),inset 0 -1px 0 rgba(0,0,0,.3);
+.notifications-icon {
+    position: relative;
+    top: 1px;
+    display: inline-block;
+    font-family: 'Glyphicons Halflings';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 120%;
+    line-height: 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
-.notification h5 {
-	font-weight: bold;
-	margin-bottom: 3px;
+.notifications-icon:before {
+	content: "\e123";
+}
+
+.notifications-icon.active {
+	color: #ff9d32;
+	animation: notify-animation .2s ease-in-out infinite alternate;
+}
+
+@keyframes notify-animation {
+  from {
+    transform: rotate(-10deg);
+  }
+  to {
+    transform: rotate(10deg);
+  }
 }
 
 /*
  * Achievements
  */
 
-.achievement {
-	padding: 15px 5px 5px 5px;
-	-webkit-box-shadow: 0px 1px 4px -1px rgba(0,0,0,0.64);
-	-moz-box-shadow: 0px 1px 4px -1px rgba(0,0,0,0.64);
-	box-shadow: 0px 1px 4px -1px rgba(0,0,0,0.64);
-}
-
-.achievement .media-left .glyphicon {
+.achievement-icon {
 	font-size: 300%;
 	margin: 10px;
 }
 
-.achievement .media-left .badge {
+.achievement-badge {
 	position: absolute;
 	margin: -20px 0 0 20px;
 }
@@ -92,7 +164,7 @@ body {
 
 .track-tree {
 	width: 100%;
-	height: 300px;
+	height: 100%;
 }
 
 .track-tree text {
@@ -116,20 +188,20 @@ body {
 
 .track-tree .node.success rect,
 .track-tree .edgePath.success path {
-	fill: rgba(60, 200, 0, 1);
-	stroke: rgba(30, 150, 0, 1);
+	fill: #5cb85c;
+	stroke: #5cb85c;
 }
 
 .track-tree .node.open rect,
 .track-tree .edgePath.open path {
-	fill: rgba(255, 200, 0, 1);
-	stroke: rgba(175, 130, 0, 1);
+	fill: #d9534f;
+	stroke: #d9534f;
 }
 
 .track-tree .node.locked rect,
 .track-tree .edgePath.locked path {
-	fill: rgba(150, 150, 150, 1);
-	stroke: rgba(100, 100, 100, 1);
+	fill: #aaa;
+	stroke: #aaa;
 }
 
 .track-tree .number {
@@ -160,10 +232,6 @@ body {
 .mission-tip.locked h3 { color: #777; }
 .mission-tip.locked .tip-status { color: #777; }
 .mission-tip .tip-reward { color: green; }
-
-.mission-icon {
-	width: 100%;
-}
 
 /*
  * Podium
@@ -238,4 +306,21 @@ body {
 }
 .col-bottom {
     vertical-align:bottom;
+}
+
+/* diff2Html */
+
+.d2h-file-header {
+	display: none;
+}
+
+/* blinking effect (yes, we are back in 1994) */
+
+.blink {
+  animation: blink-animation 1.5s linear infinite alternate;
+}
+@keyframes blink-animation {
+  to {
+    opacity: 0;
+  }
 }

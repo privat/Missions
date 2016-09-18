@@ -20,6 +20,16 @@
 	angular
 		.module('model', [])
 
+		.factory('Auth', [ '$http', function($http) {
+			return {
+				getAuthMethod: function(cb, cbErr) {
+					$http.get('/auth/auth_method')
+						.success(cb)
+						.error(cbErr);
+				}
+			}
+		}])
+
 		.factory('Players', [ '$http', function($http) {
 			return {
 				getPlayers: function(cb, cbErr) {
@@ -33,6 +43,11 @@
 						.error(cbErr);
 				},
 				getAuth: function(cb, cbErr) {
+					$http.get(apiUrl + '/player')
+						.success(cb)
+						.error(cbErr);
+				},
+				getAuthMethod: function(cb, cbErr) {
 					$http.get(apiUrl + '/player')
 						.success(cb)
 						.error(cbErr);
@@ -116,6 +131,11 @@
 		}])
 		.factory('Tracks', [ '$http', function($http) {
 			return {
+				getTracks: function(cb, cbErr) {
+					$http.get(apiUrl + '/tracks')
+						.success(cb)
+						.error(cbErr);
+				},
 				getTrack: function(tid, cb, cbErr) {
 					$http.get(apiUrl + '/tracks/' + tid)
 						.success(cb)

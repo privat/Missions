@@ -41,7 +41,7 @@ redef class Player
 			if mission_status.is_open then status.missions_open += 1
 			if mission_status.is_success then status.missions_success += 1
 			status.stars_count += mission.stars.length
-			status.stars_unlocked += mission_status.stars.length
+			status.stars_unlocked += mission_status.unlocked_stars.length
 			status.missions.add mission_status
 		end
 
@@ -64,9 +64,7 @@ redef class Mission
 	# Is a mission available for a player depending on the mission parents status
 	fun is_unlocked_for_player(config: AppConfig, player: Player): Bool do
 		if parents.is_empty then return true
-		for parent_id in parents do
-			var parent = config.missions.find_by_id(parent_id)
-			if parent == null then continue
+		for parent in load_parents(config) do
 			var status = player.mission_status(config, parent)
 			if not status.is_success then return false
 		end
@@ -101,12 +99,16 @@ class MissionStatus
 	var track: nullable Track
 
 	# Unlocked stars
-	#
-	# TODO: remove and use `star_status` once JS is updated
-	var stars = new Array[MissionStar]
+	fun unlocked_stars: Array[MissionStar] do
+		var stars = new Array[MissionStar]
+		for status in stars_status do
+			if status.is_unlocked then stars.add status.star
+		end
+		return stars
+	end
 
 	# The state of each star
-	var star_status = new Array[StarStatus]
+	var stars_status = new Array[StarStatus]
 
 	# `mission` status for `player`
 	#
@@ -119,9 +121,9 @@ class MissionStatus
 	# that the mission is locked and check the parents dependencies.
 	var status: String = "locked" is writable
 
-	var is_locked: Bool is lazy do return status == "locked"
-	var is_open: Bool is lazy do return status == "open"
-	var is_success: Bool is lazy do return status == "success"
+	fun is_locked: Bool do return status == "locked"
+	fun is_open: Bool do return status == "open"
+	fun is_success: Bool do return status == "success"
 end
 
 # The link between a Player and a Star
@@ -133,7 +135,7 @@ class StarStatus
 	var star: MissionStar
 
 	# Is the star granted?
-	var is_unlocked = false is writable
+	var is_unlocked = false is writable, optional
 
 	# The current best score (for ScoreStar)
 	var best_score: nullable Int = null is writable

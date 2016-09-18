@@ -25,26 +25,7 @@
 		$routeProvider
 			.when('/', {
 				templateUrl: 'views/index.html',
-				controller: 'PlayersCtrl'
-			})
-			.when('/login', {
-				controller : function(){
-					window.location.replace('/auth/login');
-				},
-			    template : "<div></div>"
-			})
-			.when('/shiblogin', {
-				controller : function(){
-					window.location.replace('/auth/shiblogin');
-				},
-			    template : "<div></div>"
-			})
-			.when('/logout', {
-				controller : [ '$rootScope', function($rootScope){
-					$rootScope.player = null;
-					window.location.replace('/auth/logout');
-				}],
-			    template : "<div></div>"
+				controller : 'PlayerAuth'
 			})
 			.when('/player/', {
 				templateUrl: 'views/player.html',
@@ -79,5 +60,22 @@
 				templateUrl: 'views/404.html',
 			});
 		$locationProvider.html5Mode(true);
-	});
+	})
+
+	.directive('panel404', function() {
+		return {
+			scope: {},
+			templateUrl: '/directives/404-panel.html',
+			restrict: 'E',
+			replace: true
+		};
+	})
+
+	.directive('breadcrumbs', function() {
+		return {
+			templateUrl: '/directives/breadcrumbs.html',
+			restrict: 'E',
+			replace: true
+		};
+	})
 })();

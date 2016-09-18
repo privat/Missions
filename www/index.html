@@ -17,16 +17,31 @@
 
 		<link href='//cdnjs.cloudflare.com/ajax/libs/octicons/3.5.0/octicons.css'
 			type='text/css' rel='stylesheet'>
+		<link href='//cdnjs.cloudflare.com/ajax/libs/codemirror/5.18.2/codemirror.min.css'
+			type='text/css' rel='stylesheet'>
+		<link href='//cdnjs.cloudflare.com/ajax/libs/diff2html/2.0.3/diff2html.min.css'
+			type='text/css' rel='stylesheet'>
 
+		<link href='/stylesheets/cards.css' rel='stylesheet'>
 		<link href='/stylesheets/app.css' rel='stylesheet'>
 	</head>
 	<body>
-		<nav class='navbar navbar-default navbar-fixed-top'>
+		<nav class='navbar navbar-inverse navbar-primary navbar-fixed-top'>
 			<div class='container-fluid'>
 				<div class='col-xs-8'>
 					<div class='navbar-header dropdown'>
-						<a class='navbar-brand' ng-href='/'>Missions</a>
+						<a class='navbar-brand' ng-href='/'>
+							<span class='glyphicon glyphicon-flag' />
+						</a>
+						<a class='navbar-brand' ng-href='/'>
+							Tracks
+						</a>
 					</div>
+					<ul class='nav navbar-nav'>
+						<li>
+							<breadcrumbs />
+						<li>
+					</ul>
 				</div>
 				<div class='col-xs-4' ng-controller='AuthCtrl as authCtrl' ng-init='authCtrl.loadSession()'>
 					<player-menu player='session'></player-menu>
@@ -55,6 +70,10 @@
 			src='//cdnjs.cloudflare.com/ajax/libs/angular-loading-bar/0.9.0/loading-bar.min.js'>
 		</script>
 		<script src='https://cdnjs.cloudflare.com/ajax/libs/jquery.tipsy/1.0.3/jquery.tipsy.min.js'></script>
+		<script src='//cdnjs.cloudflare.com/ajax/libs/codemirror/5.18.2/codemirror.min.js'></script>
+		<script src='//cdnjs.cloudflare.com/ajax/libs/codemirror/5.18.2/mode/javascript/javascript.min.js'></script>
+		<script src='//cdnjs.cloudflare.com/ajax/libs/diff2html/2.0.3/diff2html.min.js'></script>
+		<script src='//cdnjs.cloudflare.com/ajax/libs/diff2html/2.0.3/diff2html-ui.min.js'></script>
 
 		<script src='//d3js.org/d3.v3.min.js'></script>
 		<script src='//cpettitt.github.io/project/dagre-d3/v0.4.17/dagre-d3.min.js'></script>

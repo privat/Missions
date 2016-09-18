@@ -17,18 +17,40 @@ module api_auth_github
 import api_auth
 import popcorn::pop_auth
 
+redef class AppConfig
+	redef var default_auth_method = "github"
+end
+
 redef class AuthRouter
 	redef init do
-		use("/login", new GithubLogin(config.gh_client_id))
-		use("/oauth", new MissionsGithubOAuthCallBack(config))
-		use("/logout", new GithubLogout)
+		super
+		if config.auth_method == "github" then
+			use("/login", new MissionsGithubLogin(config))
+			use("/oauth", new MissionsGithubOAuthCallBack(config))
+			use("/logout", new MissionsGithubLogout)
+		end
+	end
+end
+
+class MissionsGithubLogin
+	super GithubLogin
+	super AuthLogin
+
+	autoinit config
+
+	init do
+		client_id = config.gh_client_id
+	end
+
+	redef fun get(req, res) do
+		store_next_page(req)
 		super
 	end
 end
 
 class MissionsGithubOAuthCallBack
 	super GithubOAuthCallBack
-	super APIHandler
+	super AuthLogin
 
 	autoinit config
 
@@ -39,6 +61,7 @@ class MissionsGithubOAuthCallBack
 
 	redef fun get(req, res) do
 		super
+
 		var session = req.session
 		if session == null then return
 		var user = session.user
@@ -49,21 +72,20 @@ class MissionsGithubOAuthCallBack
 			player = new Player(id)
 			player.name = user.login
 			player.avatar_url = user.avatar_url
-			player.add_achievement(config, new FirstLoginAchievement(player))
-			config.players.save player
+			register_new_player(player)
 		end
 		session.player = player
-		res.redirect "/player"
+		redirect_after_login(req, res)
 	end
-
 end
 
-redef class GithubLogout
+class MissionsGithubLogout
+	super Logout
+
 	redef fun get(req, res) do
 		var session = req.session
 		if session == null then return
 		session.user = null
-		session.player = null
-		res.redirect "/"
+		super
 	end
 end

@@ -26,105 +26,249 @@
 			$scope.mid = $scope.missionId;
 		}])
 
-		.controller('MissionCtrl', ['Missions', function(Missions) {
-			$missionCtrl = this;
+		/* Mission */
 
-			this.loadMission = function() {
-				Missions.getMission(this.missionId,
-					function(data) {
-						$missionCtrl.mission = data;
-					}, function(err) {});
-			};
-
-			this.loadMission();
-
-		}])
-
-		.controller('PlayerMissionCtrl', ['Errors', 'Players', '$scope', function (Errors, Players, $scope) {
-
-			var vm = this;
-
-			vm.getMissionStatus = function () {
-				Players.getMissionStatus(vm.playerId, vm.missionId, function(data) {
-					vm.missionStatus = data;
-				}, Errors.handleError);
-			};
-
-			vm.statusByStar = function (starId) {
-				var unlocked = false;
-				angular.forEach(vm.missionStatus.star_status.__items, function (starStatus) {
-					if(starId == starStatus.star._id) {
-						unlocked = starStatus.is_unlocked;
-					}
-				});
-				return unlocked;
-			};
-
-			$scope.$on('mission_submission', function (data) {
-				vm.getMissionStatus();
-			});
-
-			vm.getMissionStatus();
-
-		}])
-
-		.controller('MissionSubmitCtrl', ['Missions', '$scope', function (Missions, $scope) {
-			$scope.source = "";
-			$scope.lang = "pep8";
-			$scope.engine = "pep8term";
-
-			$scope.submit = function () {
-				var data = {
-					source: $scope.source,
-					lang: $scope.lang,
-					engine: $scope.engine
-				};
-				Missions.sendMissionSubmission(data, $scope.missionId, function (data) {
-					$scope.source = data;
-					$scope.$emit('mission_submission', 'success');
-				}, function () {
-					console.log("err");
-				});
-			};
-		}])
-
-		.directive('mission', [function() {
-			return {
-				scope: {},
-				bindToController: {
-					missionId: '='
-				},
-				controller: 'MissionCtrl',
-				controllerAs: 'missionCtrl',
-				restrict: 'E',
-				replace: true,
-				templateUrl: '/directives/missions/mission.html'
-			};
-		}])
-
-		.directive('playerMission', [function() {
+		.directive('mission', ['$rootScope', function($rootScope) {
 			return {
 				scope: {},
 				bindToController: {
 					playerId: '=',
 					missionId: '='
 				},
-				controller: 'PlayerMissionCtrl',
+				controller: ['Errors', 'Missions', 'Players', '$scope', function(Errors, Missions, Players, $scope) {
+					var $ctrl = this;
+
+					this.getMissionStatus = function () {
+						if($ctrl.playerId) {
+							Players.getMissionStatus($ctrl.playerId, $ctrl.missionId,
+								function(data) { $ctrl.missionStatus = data; }, Errors.handleError);
+						}
+					};
+
+					$scope.$on('mission_submission', function (data) {
+						$ctrl.getMissionStatus();
+					});
+
+					Missions.getMission(this.missionId, function(data) {
+						$ctrl.mission = data;
+							// Set breadcrumbs
+							$rootScope.track = data.track;
+							$rootScope.mission = data;
+							$rootScope.player = null;
+					}, function(err) {
+						$ctrl.error = err;
+					});
+					this.getMissionStatus();
+				}],
 				controllerAs: 'missionCtrl',
 				restrict: 'E',
 				replace: true,
-				templateUrl: '/directives/player/mission.html',
+				templateUrl: '/directives/missions/mission.html',
+			};
+		}])
+
+		.directive('missionPanel', [function() {
+			return {
+				scope: {},
+				bindToController: {
+					index: '=',
+					mission: '=',
+					missionStatus: '='
+				},
+				controller: function () {},
+				controllerAs: 'missionCtrl',
+				restrict: 'E',
+				replace: true,
+				templateUrl: '/directives/missions/mission-panel.html'
+			};
+		}])
+
+		.directive('missionStatus', [function () {
+			return {
+				scope: {
+					mission: '=',
+					missionStatus: '='
+				},
+				restrict: 'E',
+				replace: true,
+				templateUrl: '/directives/missions/status.html'
+			};
+		}])
+
+		.directive('missionBtn', [function () {
+			return {
+				scope: {
+					mission: '=',
+					missionStatus: '='
+				},
+				restrict: 'E',
+				replace: true,
+				templateUrl: '/directives/missions/button.html'
+			};
+		}])
+
+		/* Mission stars */
+
+		.directive('missionStars', [function () {
+			return {
+				scope: {},
+				bindToController: {
+					mission: '=',
+					missionStatus: '='
+				},
+				controller: function () {},
+				controllerAs: 'starsCtrl',
+				restrict: 'E',
+				replace: true,
+				templateUrl: '/directives/missions/stars.html'
+			};
+		}])
+
+		.directive('missionStar', [function () {
+			return {
+				scope: {},
+				bindToController: {
+					star: '=',
+					starStatus: '='
+				},
+				controller: function () {
+					this.isSuccess = function() {
+						return this.starStatus && this.starStatus.is_unlocked;
+					}
+				},
+				link: function($scope, $elem) {
+					$scope.$watch('starCtrl.star', function(star) {
+						$elem.attr('title',  star.title + ' (' + star.reward + ' pts)');
+						$elem.tooltip();
+					})
+				},
+				controllerAs: 'starCtrl',
+				restrict: 'E',
+				replace: true,
+				templateUrl: '/directives/missions/star.html'
+			};
+		}])
+
+		.directive('starProgress', [function () {
+			return {
+				scope: {},
+				bindToController: {
+					star: '=',
+					submission: '='
+				},
+				controller: ['$scope', function ($scope) {
+					var vm = this;
+
+					$scope.$watch('progressCtrl.submission', function(submission) {
+						if(!submission) return;
+						vm.score = submission[vm.star.submission_key];
+						vm.goal = vm.star.goal;
+
+						vm.bars = [];
+
+						if(vm.score <= vm.goal) {
+							vm.style = "progress-bar-success";
+							vm.width = vm.score * 100 / vm.goal;
+						} else {
+							vm.style = "progress-bar-danger";
+							vm.width = (vm.score - vm.goal) * 100 / vm.score;
+						}
+					})
+				}],
+				controllerAs: 'progressCtrl',
+				restrict: 'E',
+				replace: true,
+				templateUrl: '/directives/missions/star-progress.html'
+			};
+		}])
+
+		/* Submissions */
+
+		.controller('MissionSubmitCtrl', ['Missions', '$scope', function (Missions, $scope) {
+			var $ctrl = this;
+			$ctrl.source = "; enter your code here\n\n.END";
+			$ctrl.lang = "pep8";
+			$ctrl.engine = "pep8term";
+
+			$scope.submit = function () {
+				var data = {
+					source: btoa($ctrl.codeMirror.doc.getValue()),
+					lang: $ctrl.lang,
+					engine: $ctrl.engine
+				};
+				Missions.sendMissionSubmission(data, $ctrl.mission._id, function (data) {
+					$scope.result = data;
+					$scope.$emit('mission_submission', 'success');
+				}, function () {
+					console.log("err");
+				});
+			};
+
+			$scope.initCodeMirror = function() {
+				$ctrl.codeMirror = CodeMirror.fromTextArea(
+					document.getElementById('source'), {
+					mode:  "javascript",
+					lineNumbers: true,
+				});
+				$ctrl.codeMirror.doc.setValue($ctrl.source);
+			};
+		}])
+
+		.directive('testcaseDiff', [function() {
+			return {
+				scope: {
+					diffId: '@',
+					diffString: '@'
+				},
+				restrict: 'E',
+				link: function($scope, $element, $attr) {
+					$scope.$watch('diffString', function(diffString) {
+						var diff2htmlUi = new Diff2HtmlUI({diff: $scope.diffString});
+						diff2htmlUi.draw("#" + $scope.diffId, {
+							inputFormat: 'json',
+							outputFormat: 'side-by-side',
+							matching: 'lines',
+							synchronisedScroll: true
+						});
+					});
+				},
+				templateUrl: '/directives/missions/diff.html'
 			};
 		}])
 
 		.directive('missionSubmit', [function () {
 			return {
 				transclude: true,
-				scope: {
-					missionId: '=missionId'
+				scope: {},
+				bindToController: {
+					mission: '='
 				},
+				controller: 'MissionSubmitCtrl',
+				controllerAs: 'missionSubmitCtrl',
 				restrict: 'E',
 				templateUrl: '/directives/missions/submit.html'
+			};
+		}])
+
+		.directive('missionLocked', [function () {
+			return {
+				scope: {},
+				restrict: 'E',
+				replace: true,
+				templateUrl: '/directives/missions/locked.html'
+			};
+		}])
+
+		/* Events */
+
+		.directive('eventPanel', [function () {
+			return {
+				scope: {
+					event: '='
+				},
+				restrict: 'E',
+				replace: true,
+				templateUrl: '/directives/events/event.html'
 			};
 		}])
 })();

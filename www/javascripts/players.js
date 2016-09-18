@@ -24,8 +24,14 @@
 
 		.controller('PlayerAuth', ['$routeParams', '$rootScope', '$scope', function($routeParams, $rootScope, $scope) {
 
-			$scope.playerId = $rootScope.session._id;
+			if($rootScope.session) {
+				$scope.playerId = $rootScope.session._id;
+			}
 			$scope.notifId = $routeParams.nid;
+
+			$rootScope.track = null;
+			$rootScope.mission = null;
+			$rootScope.player = null;
 		}])
 
 		.factory('Errors', ['$rootScope', function($rootScope) {
@@ -46,30 +52,63 @@
 			};
 		}])
 
-		.directive('playerMenu', ['$rootScope', function($rootScope) {
+		.directive('player', ['$rootScope', function($rootScope) {
 			return {
+				scope: {},
+				bindToController: {
+					session: '=',
+					playerId: '='
+				},
+				controller: ['Errors', 'Players', function(Errors, Players) {
+					var vm = this;
+
+					this.loadPlayer = function() {
+						Players.getPlayer(vm.playerId,
+							function(data) {
+								vm.player = data;
+								// Set breadcrumbs
+								$rootScope.player = data;
+							}, function(err) {
+								vm.error = err;
+							});
+					};
+
+					this.loadPlayer();
+				}],
+				controllerAs: 'playerCtrl',
 				restrict: 'E',
 				replace: true,
-				templateUrl: '/directives/player/menu.html',
-				scope: { player: '=' }
+				templateUrl: '/directives/player/player.html'
 			};
 		}])
 
-		.controller('SidebarCtrl', ['Errors', 'Players', function(Errors, Players) {
-			$sidebarCtrl = this;
+		.directive('playerMenu', ['Errors', 'Auth', '$rootScope', function(Errors, Auth, $rootScope) {
+			return {
+				scope: {},
+				bindToController: {
+					player: '='
+				},
+				controller: ['$location', function ($location) {
+					var vm = this;
 
-			this.loadStats = function() {
-				Players.getStats(this.playerId,
-					function(data) {
-						$sidebarCtrl.stats = data;
-					}, Errors.handleError);
+					this.login = function() {
+						window.location.replace('/auth/login?next=' + $location.absUrl());
+					}
+
+					this.logout = function() {
+						$rootScope.player = null;
+						window.location.replace('/auth/logout');
+					}
+
+					Auth.getAuthMethod(function(data) {
+						vm.auth_method = data.auth_method;
+					}, Errors.handleError)
+				}],
+				controllerAs: 'playerMenuCtrl',
+				templateUrl: '/directives/player/menu.html',
+				restrict: 'E',
+				replace: true
 			};
-
-			this.hasFriend = function() {
-				return this.session.friends.__items.indexOf(this.playerId) >= 0
-			};
-
-			this.loadStats();
 		}])
 
 		.directive('playerSidebar', [function() {
@@ -77,14 +116,28 @@
 				scope: {},
 				bindToController: {
 					session: '=',
-					playerId: '='
+					player: '='
 				},
-				controller: 'SidebarCtrl',
+				controller: ['Errors', 'Players', function(Errors, Players) {
+					var vm = this;
+
+					this.loadStats = function() {
+						Players.getStats(this.player._id,
+							function(data) {
+								vm.stats = data;
+							}, Errors.handleError);
+					};
+
+					this.hasFriend = function() {
+						return this.session.friends.__items.indexOf(this.playerId) >= 0
+					};
+
+					this.loadStats();
+				}],
 				controllerAs: 'sidebarCtrl',
 				restrict: 'E',
 				replace: true,
-				templateUrl: '/directives/player/sidebar.html',
-				scope: { session: '=', stats: '=' }
+				templateUrl: '/directives/player/sidebar.html'
 			};
 		}])
 
